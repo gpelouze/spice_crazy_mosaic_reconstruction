@@ -10,6 +10,18 @@ import tqdm
 import common
 
 
+def get_all_slot_images(filenames, spec_win):
+    all_imgs = []
+    for filename in tqdm.tqdm(filenames, desc='Opening data'):
+        filename = common.SpiceUtils.ias_fullpath(filename)
+        with fits.open(filename) as hdul:
+            hdu = hdul[spec_win]
+            imgs = hdu.data[0].T
+            imgs = imgs[:, :, ::-1]
+        all_imgs.append(imgs)
+    return np.array(all_imgs)
+
+
 def slot_response(I):
     ''' Compute slot response function for a series of images
 
@@ -38,8 +50,6 @@ def slot_response(I):
 
 if __name__ == '__main__':
 
-    from process_rasters import get_all_slot_images
-
     p = argparse.ArgumentParser()
     p.add_argument('--spec-win', required=True,
                    help='spectral window')
@@ -48,7 +58,7 @@ if __name__ == '__main__':
     filenames = common.get_mosaic_filenames()
 
     # Compute
-    _, _, I = get_all_slot_images(filenames, args.spec_win)
+    I = get_all_slot_images(filenames, args.spec_win)
     slot_resp = slot_response(I)
 
     # Save
