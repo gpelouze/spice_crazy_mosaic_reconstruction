@@ -13,6 +13,7 @@ import common
 
 
 class ScalingFunctions:
+    @staticmethod
     def log(x, b):
         x = (b-1)*x + 1
         return np.log(x) / np.log(b)

@@ -11,7 +11,6 @@ import astropy.units as u
 import matplotlib.pyplot as plt
 import numpy as np
 import papy.plot
-import scipy.interpolate as si
 import tqdm
 import yaml
 
@@ -20,7 +19,7 @@ import common
 
 
 def get_slot_images(hdu):
-    ''' Get slot images for an HDU
+    """ Get slot images for an HDU
 
     Returns
     =======
@@ -30,7 +29,7 @@ def get_slot_images(hdu):
         Helioprojective latitude in arcsec, for each slit position
     imgs : list of arrays of shape (ny, nx)
         Image for each slit position
-    '''
+    """
     # get world coordinates
     nt, nD, ny, nx = hdu.data.shape
     ix = np.arange(0, nx)
@@ -107,8 +106,8 @@ def get_common_tile_size(Tx, Ty, common_wcs):
     nx += 4
     ny += 4
     # make even
-    nx += nx%2
-    ny += ny%2
+    nx += nx % 2
+    ny += ny % 2
     return nx, ny
 
 
@@ -144,13 +143,17 @@ def get_new_raster_coordinates(common_wcs, nx, ny, Tx, Ty):
 
 
 def assemble_raster(slot_resp, common_wcs, nx, ny, Tx, Ty, I):
-    new_wcs, new_Tx, new_Ty = get_new_raster_coordinates(common_wcs, nx, ny, Tx, Ty)
+    new_wcs, new_Tx, new_Ty = get_new_raster_coordinates(
+        common_wcs, nx, ny, Tx, Ty
+        )
 
     assembled_I = np.full(new_Tx.shape, 0, dtype=I.dtype)
     assembled_weights = np.full(new_Tx.shape, 0, dtype=I.dtype)
     for this_Tx, this_Ty, this_I in zip(Tx, Ty, I):
         new_I = common.remap(new_Tx, new_Ty, this_I, this_Tx, this_Ty)
-        new_slot_resp = common.remap(new_Tx, new_Ty, slot_resp, this_Tx, this_Ty)
+        new_slot_resp = common.remap(
+            new_Tx, new_Ty, slot_resp, this_Tx, this_Ty
+            )
         new_I[np.isnan(new_I)] = 0
         new_slot_resp[np.isnan(new_slot_resp)] = 0
         assembled_I += new_I
@@ -159,22 +162,27 @@ def assemble_raster(slot_resp, common_wcs, nx, ny, Tx, Ty, I):
     assembled_I /= assembled_weights
 
     header = new_wcs.to_header()
-    hdul = fits.HDUList([
-        fits.PrimaryHDU(assembled_I.T, header=header),
-        fits.ImageHDU(assembled_weights.T, header=header),
-        ])
+    hdul = fits.HDUList(
+        [
+            fits.PrimaryHDU(assembled_I.T, header=header),
+            fits.ImageHDU(assembled_weights.T, header=header),
+            ]
+        )
 
     return hdul
-
 
 
 if __name__ == '__main__':
 
     p = argparse.ArgumentParser()
-    p.add_argument('--spec-win', required=True,
-                   help='spectral window')
-    p.add_argument('-c', '--cores', type=int,
-                   help='multiprocessing cores')
+    p.add_argument(
+        '--spec-win', required=True,
+        help='spectral window'
+        )
+    p.add_argument(
+        '-c', '--cores', type=int,
+        help='multiprocessing cores'
+        )
     args = p.parse_args()
     common.validate_spectral_window(args.spec_win)
     filenames = common.get_mosaic_filenames()
@@ -184,10 +192,10 @@ if __name__ == '__main__':
 
     # Crop above and below the slit
     iymin, iymax = 103, 863
-    Tx = Tx[..., iymin:iymax+1, :]
-    Ty = Ty[..., iymin:iymax+1, :]
-    I = I[..., iymin:iymax+1, :]
-    slot_resp = slot_resp[iymin:iymax+1, :]
+    Tx = Tx[..., iymin:iymax + 1, :]
+    Ty = Ty[..., iymin:iymax + 1, :]
+    I = I[..., iymin:iymax + 1, :]
+    slot_resp = slot_resp[iymin:iymax + 1, :]
 
     common_wcs = get_common_grid(Tx, Ty, new_CDELT=1)
     tile_nx, tile_ny = get_common_tile_size(Tx, Ty, common_wcs)
@@ -221,7 +229,8 @@ if __name__ == '__main__':
         img = hdul[0].data
         plt.clf()
         ax = papy.plot.get_imshowsave_ax(img.shape, plt.gcf(), clearfig=True)
-        ax.imshow(img,
+        ax.imshow(
+            img,
             vmin=np.nanpercentile(img, 1),
             vmax=np.nanpercentile(img, 99.5),
             cmap='gray',

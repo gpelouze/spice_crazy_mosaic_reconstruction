@@ -23,7 +23,7 @@ def get_all_slot_images(filenames, spec_win):
 
 
 def slot_response(I):
-    ''' Compute slot response function for a series of images
+    """ Compute slot response function for a series of images
 
     Parameters
     ==========
@@ -34,7 +34,7 @@ def slot_response(I):
     =======
     slot_resp : array of shape (ny, nx)
         Slot response function
-    '''
+    """
     if I.ndim > 3:
         I = I.reshape((-1, *I.shape[-2:]))
 

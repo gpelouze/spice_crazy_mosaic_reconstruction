@@ -11,22 +11,24 @@ import scipy.interpolate as si
 
 
 class SpiceUtils:
-    re_spice_L123_filename = re.compile('''
+    re_spice_L123_filename = re.compile(
+        r"""
         solo
         _(?P<level>L[123])
         _spice
             (?P<concat>-concat)?
             -(?P<slit>[wn])
-            -(?P<type>(?:ras|sit|exp))
+            -(?P<type>(ras|sit|exp))
             (?P<db>-db)?
             (?P<int>-int)?
         _(?P<time>\d{8}T\d{6})
         _(?P<version>V\d{2})
         _(?P<SPIOBSID>\d+)-(?P<RASTERNO>\d+)
         \.fits
-        ''',
+        """,
         re.VERBOSE)
 
+    @staticmethod
     def read_spice_uio_catalog():
         """
         Read UiO text table SPICE FITS files catalog
@@ -39,8 +41,10 @@ class SpiceUtils:
 
         Example queries that can be done on the result:
 
-        * `df[(df.LEVEL == "L2") & (df["DATE-BEG"] >= "2020-11-17") & (df["DATE-BEG"] < "2020-11-18") & (df.XPOSURE > 60.)]`
-        * `df[(df.LEVEL == "L2") & (df.STUDYDES == "Standard dark for cruise phase")]`
+        * `df[(df.LEVEL == "L2") & (df["DATE-BEG"] >= "2020-11-17") \
+          & (df["DATE-BEG"] < "2020-11-18") & (df.XPOSURE > 60.)]`
+        * `df[(df.LEVEL == "L2") \
+          & (df.STUDYDES == "Standard dark for cruise phase")]`
 
         Source: https://spice-wiki.ias.u-psud.fr/doku.php/data:data_analysis_manual:read_catalog_python
         """
@@ -48,19 +52,23 @@ class SpiceUtils:
             os.getenv('SOLO_ARCHIVE', '/archive/SOLAR-ORBITER/'),
             'SPICE/fits/spice_catalog.txt')
         columns = list(pd.read_csv(cat_file, nrows=0).keys())
-        date_columns = ['DATE-BEG','DATE', 'TIMAQUTC']
-        df = pd.read_table(cat_file, skiprows=1, names=columns, na_values="MISSING",
-                        parse_dates=date_columns, low_memory=False)
+        date_columns = ['DATE-BEG', 'DATE', 'TIMAQUTC']
+        df = pd.read_table(
+            cat_file, skiprows=1, names=columns, na_values="MISSING",
+            parse_dates=date_columns, low_memory=False
+            )
         df.LEVEL = df.LEVEL.apply(lambda string: string.strip())
         df.STUDYTYP = df.STUDYTYP.apply(lambda string: string.strip())
         return df
 
+    @staticmethod
     def parse_filename(filename):
         m = SpiceUtils.re_spice_L123_filename.match(filename)
         if m is None:
             raise ValueError(f'could not parse SPICE filename: {filename}')
         return m.groupdict()
 
+    @staticmethod
     def ias_fullpath(filename):
         d = SpiceUtils.parse_filename(filename)
         date = parse_date(d['time'])
@@ -76,7 +84,7 @@ class SpiceUtils:
 
 
 def ang_to_pipi(a):
-    ''' Convert any angle to the range ]-pi, pi]
+    """ Convert any angle to the range ]-pi, pi]
 
     Parameters
     ==========
@@ -87,7 +95,7 @@ def ang_to_pipi(a):
     =======
     a : float or astropy quantity
         Converted angle.
-    '''
+    """
     if hasattr(a, 'unit'):
         pi = u.Quantity(np.pi, 'rad').to(a.unit)
     else:
@@ -112,14 +120,14 @@ def validate_spectral_window(spec_win):
         'O VI 1032 - SH',
         ]
     if spec_win not in allowed_spec_wins:
-        raise ValueError(f'invalid window: {args.spec_win}')
+        raise ValueError(f'invalid window: {spec_win}')
 
 
 def get_mosaic_filenames():
     cat = SpiceUtils.read_spice_uio_catalog()
     filters = (
         (cat['LEVEL'] == 'L2')
-        & (cat['MISOSTUD'] == '2093')  # https://spice-stable.ias.u-psud.fr/study_gen/study_detail/2014/
+        & (cat['MISOSTUD'] == '2093')
         & (cat['DATE-BEG'] >= '2022-03-07T06:59:59')
         & (cat['DATE-BEG'] <= '2023-03-07T11:29:59')
         )

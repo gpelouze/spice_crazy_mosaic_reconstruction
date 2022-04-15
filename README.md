@@ -1,4 +1,4 @@
-# Assemble SPIICE crazy mosaic
+# Assemble SPICE crazy mosaic
 
 ## Pipeline
 
