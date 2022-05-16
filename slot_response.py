@@ -17,7 +17,6 @@ def get_all_slot_images(filenames, spec_win):
         with fits.open(filename) as hdul:
             hdu = hdul[spec_win]
             imgs = hdu.data[0].T
-            imgs = imgs[:, :, ::-1]
         all_imgs.append(imgs)
     return np.array(all_imgs)
 

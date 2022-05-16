@@ -53,8 +53,6 @@ def get_slot_images(hdu):
     Txs = Txs.to('arcsec').value
     Tys = Tys.to('arcsec').value
 
-    imgs = imgs[:, :, ::-1]
-
     return Txs, Tys, imgs
 
 
