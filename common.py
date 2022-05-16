@@ -50,7 +50,7 @@ class SpiceUtils:
         """
         cat_file = os.path.join(
             os.getenv('SOLO_ARCHIVE', '/archive/SOLAR-ORBITER/'),
-            'SPICE/fits/spice_catalog.txt')
+            'SPICE', 'fits', 'spice_catalog.txt')
         columns = list(pd.read_csv(cat_file, nrows=0).keys())
         date_columns = ['DATE-BEG', 'DATE', 'TIMAQUTC']
         df = pd.read_table(
@@ -75,9 +75,9 @@ class SpiceUtils:
 
         fullpath = os.path.join(
             os.getenv('SOLO_ARCHIVE', '/archive/SOLAR-ORBITER/'),
-            'SPICE/fits/',
+            'SPICE', 'fits',
             'level' + d['level'].lstrip('L'),
-            f'{date.year:04d}/{date.month:02d}/{date.day:02d}',
+            f'{date.year:04d}', '{date.month:02d}', '{date.day:02d}',
             filename)
 
         return fullpath
