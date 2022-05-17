@@ -77,7 +77,7 @@ class SpiceUtils:
             os.getenv('SOLO_ARCHIVE', '/archive/SOLAR-ORBITER/'),
             'SPICE', 'fits',
             'level' + d['level'].lstrip('L'),
-            f'{date.year:04d}', '{date.month:02d}', '{date.day:02d}',
+            f'{date.year:04d}', f'{date.month:02d}', f'{date.day:02d}',
             filename)
 
         return fullpath
