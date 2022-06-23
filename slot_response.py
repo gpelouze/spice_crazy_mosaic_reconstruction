@@ -3,6 +3,8 @@
 import argparse
 
 from astropy.io import fits
+import matplotlib as mpl
+import matplotlib.gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import tqdm
@@ -67,26 +69,17 @@ if __name__ == '__main__':
 
     # Plot
     plt.clf()
-    plt.subplot(131)
-    slot_resp_y = np.nanmedian(slot_resp, axis=1)
-    w = np.where(slot_resp_y > 0.5)[0]
-    if w.size > 2:
-        w1 = w[0]
-        w2 = w[-1]
-        plt.axvline(w1, color='C1', label=f'{w1}')
-        plt.axvline(w2, color='C2', label=f'{w2}')
-        print(args.spec_win, w1, w2)
-    plt.plot(slot_resp_y, 'C0')
-    plt.legend()
-    plt.xlabel('$Y$ [px]')
-    plt.ylabel('$r$')
-    plt.subplot(132)
-    plt.plot(np.nanmedian(slot_resp, axis=0))
-    plt.xlabel('$X$ [px]')
-    plt.ylabel('$r$')
-    plt.subplot(133)
-    plt.imshow(slot_resp, vmin=0, vmax=1, aspect=.25)
-    plt.colorbar(label='$r$')
-    plt.xlabel('$X$ [px]')
-    plt.ylabel('$Y$ [px]')
+    gs = mpl.gridspec.GridSpec(1, 2, width_ratios=[1, 2],
+                               left=.05, right=.98)
+    gs.tight_layout(plt.gcf())
+    ax2 = plt.subplot(gs[0])
+    ax1 = plt.subplot(gs[1])
+    ax1.plot(np.nanmedian(slot_resp, axis=0))
+    ax1.set_xlabel('$X$ [px]')
+    ax1.set_ylabel('Response')
+    m = ax2.imshow(slot_resp, vmin=0, vmax=1, aspect=.25)
+    # plt.colorbar(m, label='Response')
+    ax2.set_xlabel('$X$ [px]')
+    ax2.set_ylabel('$Y$ [px]')
     plt.savefig(f'io/slot_response_{args.spec_win}.pdf')
+    # plt.show()
