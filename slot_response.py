@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import os
 
 from astropy.io import fits
 import matplotlib as mpl
@@ -23,7 +24,7 @@ def get_all_slot_images(filenames, spec_win):
     return np.array(all_imgs)
 
 
-def slot_response(I):
+def compute_slot_response(I):
     """ Compute slot response function for a series of images
 
     Parameters
@@ -49,6 +50,24 @@ def slot_response(I):
     return slot_resp
 
 
+def load_slot_response(spec_win):
+    """ Load slot response function for a given spectral window
+    Parameters
+    ==========
+    spec_win : str
+        Name of the spectral window
+    Returns
+    =======
+    slot_resp : array of shape (ny, nx)
+        Slot response function
+    """
+    slot_resp = np.load(os.path.join(
+        'io', 'slot_response',
+        f'{spec_win}_slot_response.npy'
+        ))
+    # slot_resp = np.clip(slot_resp, 0, None)
+    return slot_resp
+
 if __name__ == '__main__':
 
     p = argparse.ArgumentParser()
@@ -59,8 +78,7 @@ if __name__ == '__main__':
     filenames = common.get_mosaic_filenames()
 
     # Compute
-    I = get_all_slot_images(filenames, args.spec_win)
-    slot_resp = slot_response(I)
+    slot_resp = load_slot_response(args.spec_win)
 
     # Save
     filename = f'io/slot_response_{args.spec_win}.fits'

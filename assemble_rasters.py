@@ -77,6 +77,10 @@ def merge_tiles(tiles_wcs, I, weights, common_wcs):
             slice(iy0 - ny//2, iy0 + ny//2),
             )
         mask = (this_weights != 0) & np.isfinite(this_weights)
+        # cut-out borders
+        mask[:30] = False
+        mask[-60:] = False
+        mask[:, :20] = False
         mask &= ~merged_map[sl]  # keep earlier tiles
         assembled_I[sl][mask] = this_I[mask]
         assembled_weights[sl][mask] = this_weights[mask]

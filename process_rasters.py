@@ -14,7 +14,7 @@ import papy.plot
 import tqdm
 import yaml
 
-from slot_response import slot_response
+import slot_response
 import common
 
 
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     filenames = common.get_mosaic_filenames()
 
     Tx, Ty, I = get_all_slot_images(filenames, args.spec_win)
-    slot_resp = slot_response(I)
+    slot_resp = slot_response.load_slot_response(args.spec_win)
 
     # Crop above and below the slit
     iymin, iymax = 103, 863
