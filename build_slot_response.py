@@ -104,15 +104,6 @@ def normalize_slot_response(img, slot_response, m, sr_center):
         fourth -= m
         x_final = np.nanargmin(slot_response[third:fourth + 1]) + third
 
-    # New slot response with the background and normalisation taken into
-    # account
-
-    # remove background
-    v_min1 = slot_response[x_initial]
-    v_min2 = slot_response[x_final]
-    v_min = min(v_min1, v_min2)
-    slot_response = slot_response - v_min
-
     # remove negative values
     slot_response_weighted_average = np.where(
         slot_response < 0, 0.0, slot_response
@@ -124,7 +115,7 @@ def normalize_slot_response(img, slot_response, m, sr_center):
     #  Final slot response values by normalisation (30"/1,098")
     integral = np.nansum(slot_response_weighted_average) / 30 * 1.098
     slot_response = slot_response / integral
-    img = (img - v_min) / integral
+    img = img / integral
 
     # Calculating the weighted average of the final slot_response
     dispersion_array = np.arange(1, len(slot_response) + 1, 1)  # px
