@@ -2,6 +2,7 @@
 
 import argparse
 import functools
+import glob
 import itertools
 import multiprocessing as mp
 
@@ -16,6 +17,22 @@ import yaml
 
 import slot_response
 import common
+
+
+def get_mosaic_filenames(uio_mirror=False):
+    if uio_mirror:
+        cat = common.SpiceUtils.read_spice_uio_catalog()
+        filters = (
+                (cat['LEVEL'] == 'L2')
+                & (cat['MISOSTUD'] == '2093')
+                & (cat['DATE-BEG'] >= '2022-03-07T06:59:59')
+                & (cat['DATE-BEG'] <= '2023-03-07T11:29:59')
+            )
+        res = cat[filters]
+        files = [common.SpiceUtils.ias_fullpath(f) for f in res['FILENAME']]
+    else:
+        files = sorted(glob.glob('io/fits_crazy_mosaic/*.fits'))
+    return files
 
 
 def get_slot_images(hdu):
@@ -61,7 +78,6 @@ def get_all_slot_images(filenames, spec_win):
     all_Tys = []
     all_imgs = []
     for filename in tqdm.tqdm(filenames, desc='Opening data'):
-        filename = common.SpiceUtils.ias_fullpath(filename)
         with fits.open(filename) as hdul:
             hdu = hdul[spec_win]
             Txs, Tys, imgs = get_slot_images(hdu)
@@ -183,7 +199,7 @@ if __name__ == '__main__':
         )
     args = p.parse_args()
     common.validate_spectral_window(args.spec_win)
-    filenames = common.get_mosaic_filenames()
+    filenames = get_mosaic_filenames()
 
     Tx, Ty, I = get_all_slot_images(filenames, args.spec_win)
     slot_resp = slot_response.load_slot_response(args.spec_win)

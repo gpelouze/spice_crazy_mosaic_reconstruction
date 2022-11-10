@@ -121,16 +121,3 @@ def validate_spectral_window(spec_win):
         ]
     if spec_win not in allowed_spec_wins:
         raise ValueError(f'invalid window: {spec_win}')
-
-
-def get_mosaic_filenames():
-    cat = SpiceUtils.read_spice_uio_catalog()
-    filters = (
-        (cat['LEVEL'] == 'L2')
-        & (cat['MISOSTUD'] == '2093')
-        & (cat['DATE-BEG'] >= '2022-03-07T06:59:59')
-        & (cat['DATE-BEG'] <= '2023-03-07T11:29:59')
-        )
-    res = cat[filters]
-    filenames = list(res['FILENAME'])
-    return filenames
