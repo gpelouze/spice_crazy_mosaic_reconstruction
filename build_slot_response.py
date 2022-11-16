@@ -172,13 +172,22 @@ def gen_slot_response(images, win_centers, output_dir, m=1):
             dat = np.load(img_fn)
             sr_center = dat['image_center']
             win_center_distance = abs(sr_center - mosaic_win_center)
-            data.append([dat['I'], win_center_distance, sr_center])
+            data.append([
+                dat['I'],
+                win_center_distance,
+                sr_center,
+                os.path.basename(str(dat['filename'])),
+                ])
 
         def sorter(d):
             quality_factors = d[1]
             return quality_factors
 
         data = sorted(data, key=sorter)[:920]
+
+        kept_files = [d[3] for d in data]
+        with open(f'{output_dir}/{spec_win}_slot_response.txt', 'w') as f:
+            f.write('\n'.join(kept_files))
 
         im = [d[0] for d in data]
 
